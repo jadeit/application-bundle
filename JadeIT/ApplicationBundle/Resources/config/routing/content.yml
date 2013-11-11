@@ -1,0 +1,35 @@
+content:
+    pattern:  /
+    defaults: { _controller: "JadeITApplicationBundle:Content:index" }
+
+content_new:
+    pattern:  /new
+    defaults: { _controller: "JadeITApplicationBundle:Content:new" }
+
+content_create:
+    pattern:  /create
+    defaults: { _controller: "JadeITApplicationBundle:Content:create" }
+    requirements: { _method: post }
+
+content_show:
+    pattern:  /{id}.{_format}
+    defaults:
+        _controller: "JadeITApplicationBundle:Content:show"
+        _format: html
+        maxAge: 259500
+        sharedAge: 259500
+        private: false
+
+content_edit:
+    pattern:  /{id}/edit
+    defaults: { _controller: "JadeITApplicationBundle:Content:edit" }
+
+content_update:
+    pattern:  /{id}/update
+    defaults: { _controller: "JadeITApplicationBundle:Content:update" }
+    requirements: { _method: post|put }
+
+content_delete:
+    pattern:  /{id}/delete
+    defaults: { _controller: "JadeITApplicationBundle:Content:delete" }
+    requirements: { _method: post|delete }
