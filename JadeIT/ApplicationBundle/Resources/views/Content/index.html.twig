@@ -1,0 +1,47 @@
+{% extends '::base.html.twig' %}
+
+{% set header_properties = {
+    title: 'Contents',
+    breadcrumbs: [
+        { title: 'Contents' },
+    ]
+} %}
+
+{% block title %}{{ parent() }} - {{ header_properties.title }}{% endblock %}
+
+{% block body -%}
+    {% include '::page_header.html.twig' with header_properties %}
+
+    <table class="records_list table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Active</th>
+                <th>Modified</th>
+                <th>Added</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a target="_blank" href="{{ path('content_show', { 'id': entity.name }) }}">{{ entity.title }}</a></td>
+                <td>{{ entity.active }}</td>
+                <td>{% if entity.modified %}{{ entity.modified|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{% if entity.added %}{{ entity.added|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>
+                    <a class="btn" href="{{ path('content_edit', { 'id': entity.name }) }}">Edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+        <ul>
+        <li>
+            <a href="{{ path('content_new') }}">
+                Create a new entry
+            </a>
+        </li>
+    </ul>
+    {% endblock %}

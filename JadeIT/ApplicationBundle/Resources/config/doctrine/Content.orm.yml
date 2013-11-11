@@ -1,0 +1,26 @@
+JadeIT\ApplicationBundle\Entity\Content:
+    type: entity
+    table: null
+    fields:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+        name:
+            type: string
+            length: 255
+            index: true
+            unique: true
+        title:
+            type: string
+            length: 255
+        active:
+            type: boolean
+        modified:
+            type: datetime
+        added:
+            type: datetime
+    lifecycleCallbacks:
+        prePersist: [ prePersist ]
+        preUpdate: [ preUpdate ]

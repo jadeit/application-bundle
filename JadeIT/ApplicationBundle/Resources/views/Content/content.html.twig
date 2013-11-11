@@ -1,0 +1,31 @@
+{% extends '::base.html.twig' %}
+
+{% set header_properties = {
+    title: entity.title,
+    breadcrumbs: [
+        { title: entity.title }
+    ]
+} %}
+
+{% block title %}{{ parent() }} - {{ header_properties.title }}{% endblock %}
+
+{% block body -%}
+    {% include '::page_header.html.twig' with header_properties %}
+
+    {% block content %}{% endblock %}
+
+    <p class="muted" style="text-align: right;">Last modified on {{ entity.modified|date }}</p>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <div>
+            <form class="pull-right" action="{{ path('content_delete', { 'id': entity.id }) }}" method="post">
+                <input type="hidden" name="_method" value="DELETE" />
+                {{ form_widget(delete_form) }}
+                <button class="btn red" type="submit">Delete</button>
+            </form>
+            <a class="btn blue" href="{{ path('content_edit', { 'id': entity.name }) }}">
+                Edit
+            </a>
+        </div>
+    {% endif %}
+{% endblock %}

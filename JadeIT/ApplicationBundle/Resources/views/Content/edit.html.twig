@@ -1,0 +1,46 @@
+{% extends '::base.html.twig' %}
+
+{% set header_properties = {
+    title: 'Update Content: ' ~ entity.title,
+    breadcrumbs: [
+        { title: 'Content', href: path('content')},
+        { title: entity.title, href: path('content_show', {id: entity.name}) },
+        { title: 'Edit' }
+    ]
+} %}
+
+{% block title %}{{ parent() }} - {{ header_properties.title }}{% endblock %}
+
+{% block body -%}
+    {% include '::page_header.html.twig' with header_properties %}
+
+    <form action="{{ path('content_update', { 'id': entity.name }) }}" method="post" {{ form_enctype(edit_form) }} class="form-horizontal">
+        <input type="hidden" name="_method" value="PUT" />
+        {{ form_widget(edit_form) }}
+        <div class="control-group">
+            <textarea rows="7" class="span6" name="content">{{ content|default('')|raw }}</textarea>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button class="btn btn-primary" type="submit">Edit</button>
+            </div>
+        </div>
+    </form>
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('content') }}">
+            Back to the list
+        </a>
+    </li>
+    {% if is_granted('ROLE_ADMIN') %}
+    <li>
+        <form action="{{ path('content_delete', { 'id': entity.id }) }}" method="post">
+            <input type="hidden" name="_method" value="DELETE" />
+            {{ form_widget(delete_form) }}
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+    {% endif %}
+</ul>
+{% endblock %}

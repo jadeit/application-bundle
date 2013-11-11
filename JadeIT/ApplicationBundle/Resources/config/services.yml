@@ -1,0 +1,13 @@
+parameters:
+    jade.i.t.content.service.class: JadeIT\ApplicationBundle\Service\Content
+    jade.i.t.content.location: "%kernel.root_dir%/Resources/views/Static"
+
+services:
+    jade.i.t.content.service:
+        class: %jade.i.t.content.service.class%
+        arguments:
+            - @twig
+            - %jade.i.t.content.location%
+            - @filesystem
+        tags:
+            - { name: kernel.event_subscriber }

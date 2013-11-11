@@ -1,13 +1,13 @@
 <?php
 
-namespace Notes\ApplicationBundle\Controller;
+namespace JadeIT\ApplicationBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-use Notes\ApplicationBundle\Event\ContentEvent;
-use Notes\ApplicationBundle\Entity\Content;
-use Notes\ApplicationBundle\Form\ContentType;
+use JadeIT\ApplicationBundle\Event\ContentEvent;
+use JadeIT\ApplicationBundle\Entity\Content;
+use JadeIT\ApplicationBundle\Form\ContentType;
 
 /**
  * Content controller.
@@ -23,10 +23,10 @@ class ContentController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entities = $em->getRepository('NotesApplicationBundle:Content')->findAll();
+        $entities = $em->getRepository('JadeITApplicationBundle:Content')->findAll();
 
         return $this->render(
-            'NotesApplicationBundle:Content:index.html.twig',
+            'JadeITApplicationBundle:Content:index.html.twig',
             array(
                 'entities' => $entities,
             )
@@ -40,33 +40,51 @@ class ContentController extends Controller
     public function createAction(Request $request)
     {
         $entity  = new Content();
-        $form = $this->createForm(new ContentType(), $entity);
+        $form = $this->createCreateForm($entity);
         $form->bind($request);
 
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $em->persist($entity);
-
             $entity->setContent($request->request->get('content'));
 
-            // Fire the New Content Event
-            $event = new ContentEvent($entity);
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch('notes.events.content.new', $event);
+            $em->persist($entity);
 
-            // Delay the flush so that the event can deal with the new entity first
+            $event = new ContentEvent($entity, $request);
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch('jade.i.t.content.create', $event);
+
             $em->flush();
 
             return $this->redirect($this->generateUrl('content_show', array('id' => $entity->getName())));
         }
 
         return $this->render(
-            'NotesApplicationBundle:Content:new.html.twig',
+            'JadeITApplicationBundle:Content:new.html.twig',
             array(
                 'entity' => $entity,
                 'form'   => $form->createView(),
             )
         );
+    }
+
+    /**
+    * Creates a form to create a Content entity.
+    *
+    * @param Content $entity The entity
+    *
+    * @return \Symfony\Component\Form\Form The form
+    */
+    private function createCreateForm(Content $entity)
+    {
+        $form = $this->createForm(new ContentType(), $entity, array(
+            'action' => $this->generateUrl('content_create'),
+            'method' => 'POST',
+            'attr' => array('class' => 'form-horizontal'),
+        ));
+
+        $form->add('submit', 'submit', array('label' => 'Create', 'attr' => array('class' => 'btn btn-primary')));
+
+        return $form;
     }
 
     /**
@@ -76,10 +94,10 @@ class ContentController extends Controller
     public function newAction()
     {
         $entity = new Content();
-        $form   = $this->createForm(new ContentType(), $entity);
+        $form   = $this->createCreateForm($entity);
 
         return $this->render(
-            'NotesApplicationBundle:Content:new.html.twig',
+            'JadeITApplicationBundle:Content:new.html.twig',
             array(
                 'entity' => $entity,
                 'form'   => $form->createView(),
@@ -97,7 +115,7 @@ class ContentController extends Controller
         if ($file === false) {
             $em = $this->getDoctrine()->getManager();
 
-            $entity = $em->getRepository('NotesApplicationBundle:Content')->findOneByName($id);
+            $entity = $em->getRepository('JadeITApplicationBundle:Content')->findOneByName($id);
         }
 
         // Check for a static file
@@ -123,13 +141,17 @@ class ContentController extends Controller
             $deleteForm = false;
         }
 
-        $response = $this->container->get('templating')->renderResponse(
-            $entity->getTemplate(),
-            array(
-                'entity' => $entity,
-                'delete_form' => $deleteForm,
-            )
-        );
+        try {
+            $response = $this->container->get('templating')->renderResponse(
+                $entity->getTemplate(),
+                array(
+                    'entity' => $entity,
+                    'delete_form' => $deleteForm,
+                )
+            );
+        } catch (\InvalidArgumentException $e) {
+            throw $this->createNotFoundException('Could not find ' . $entity->getName(), $e);
+        }
 
         if ($maxAge) {
             $response->setMaxAge($maxAge);
@@ -154,7 +176,7 @@ class ContentController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entity = $em->getRepository('NotesApplicationBundle:Content')->findOneByName($id);
+        $entity = $em->getRepository('JadeITApplicationBundle:Content')->findOneByName($id);
 
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Content entity.');
@@ -165,7 +187,7 @@ class ContentController extends Controller
         $deleteForm = $this->createDeleteForm($id);
 
         return $this->render(
-            'NotesApplicationBundle:Content:edit.html.twig',
+            'JadeITApplicationBundle:Content:edit.html.twig',
             array(
                 'entity'      => $entity,
                 'content'     => $content,
@@ -201,7 +223,7 @@ class ContentController extends Controller
             // Fire the Updated Content Event
             $event = new ContentEvent($entity);
             $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch('notes.events.content.update', $event);
+            $dispatcher->dispatch('jade.i.t.content.update', $event);
 
             // Delay the flush so that the event can deal with the updated entity first
             $em->flush();
@@ -230,7 +252,7 @@ class ContentController extends Controller
 
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $entity = $em->getRepository('NotesApplicationBundle:Content')->find($id);
+            $entity = $em->getRepository('JadeITApplicationBundle:Content')->find($id);
 
             if (!$entity) {
                 throw $this->createNotFoundException('Unable to find Content entity.');
